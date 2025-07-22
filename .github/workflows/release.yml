@@ -3,7 +3,7 @@ name: Create Plugin Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '*.*.*'
 
 permissions:
   contents: write
@@ -50,16 +50,27 @@ jobs:
 
     - name: Update readme.txt changelog
       run: |
-        # Create temp file with new changelog
+        # Create temp file with changelog entry
+        cat > changelog_entry.txt << 'EOF'
+        ${{ steps.changelog.outputs.changelog_entry }}
+        EOF
+        
+        # Insert new changelog entry after == Changelog == line
         awk '
         /^== Changelog ==/ {
           print
           print ""
-          print "${{ steps.changelog.outputs.changelog_entry }}"
+          while ((getline line < "changelog_entry.txt") > 0) {
+            print line
+          }
+          close("changelog_entry.txt")
           next
         }
         { print }
         ' readme.txt > readme.txt.tmp && mv readme.txt.tmp readme.txt
+        
+        # Clean up temp file
+        rm -f changelog_entry.txt
 
     - name: Create plugin zip
       run: |
