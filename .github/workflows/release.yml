@@ -1,0 +1,115 @@
+name: Create Plugin Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Extract version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Update plugin version
+      run: |
+        sed -i "s/Version: [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Version: ${{ steps.version.outputs.version }}/" social-webhook-notifier.php
+        sed -i "s/Stable tag: [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Stable tag: ${{ steps.version.outputs.version }}/" readme.txt
+
+    - name: Generate changelog entry
+      id: changelog
+      run: |
+        # Get commits since last tag
+        LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        if [ -n "$LAST_TAG" ]; then
+          COMMITS=$(git log --pretty=format:"* %s" $LAST_TAG..HEAD | grep -v "^* Merge" || echo "* Initial release")
+        else
+          COMMITS=$(git log --pretty=format:"* %s" | grep -v "^* Merge" || echo "* Initial release")
+        fi
+        
+        # Create changelog entry
+        echo "changelog_entry<<EOF" >> $GITHUB_OUTPUT
+        echo "= ${{ steps.version.outputs.version }} =" >> $GITHUB_OUTPUT
+        echo "$COMMITS" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Update readme.txt changelog
+      run: |
+        # Create temp file with new changelog
+        awk '
+        /^== Changelog ==/ {
+          print
+          print ""
+          print "${{ steps.changelog.outputs.changelog_entry }}"
+          next
+        }
+        { print }
+        ' readme.txt > readme.txt.tmp && mv readme.txt.tmp readme.txt
+
+    - name: Create plugin zip
+      run: |
+        zip -r social-webhook-notifier-${{ steps.version.outputs.version }}.zip . \
+          -x ".*" \
+          -x "*/.*" \
+          -x "Makefile" \
+          -x "*.zip" \
+          -x ".github/*"
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        # Get commits since last tag for release notes
+        LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        if [ -n "$LAST_TAG" ]; then
+          COMMITS=$(git log --pretty=format:"- %s" $LAST_TAG..HEAD | grep -v "^- Merge" || echo "- Initial release")
+        else
+          COMMITS=$(git log --pretty=format:"- %s" | grep -v "^- Merge" || echo "- Initial release")
+        fi
+        
+        echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+        echo "## Changes in v${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "$COMMITS" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "## Installation" >> $GITHUB_OUTPUT
+        echo "1. Download the plugin zip file" >> $GITHUB_OUTPUT
+        echo "2. Upload to WordPress admin → Plugins → Add New → Upload Plugin" >> $GITHUB_OUTPUT
+        echo "3. Activate the plugin" >> $GITHUB_OUTPUT
+        echo "4. Configure webhook URL in Settings → Social Webhook Notifier" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: Social Webhook Notifier v${{ steps.version.outputs.version }}
+        body: ${{ steps.release_notes.outputs.release_notes }}
+        files: |
+          social-webhook-notifier-${{ steps.version.outputs.version }}.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Commit version updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add social-webhook-notifier.php readme.txt
+        git commit -m "Update version to ${{ steps.version.outputs.version }} and changelog" || exit 0
+        git push origin HEAD:main || exit 0
