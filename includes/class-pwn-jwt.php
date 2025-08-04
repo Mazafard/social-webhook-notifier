@@ -5,7 +5,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-class SWN_JWT {
+class PWN_JWT {
     
     /**
      * JWT instance
@@ -44,7 +44,7 @@ class SWN_JWT {
             // Parse payload template
             $payload = $this->parse_payload_template($payload_template);
             if (!$payload) {
-                SWN_Logger::error('Invalid JWT payload template');
+                PWN_Logger::error('Invalid JWT payload template');
                 return false;
             }
             
@@ -68,7 +68,7 @@ class SWN_JWT {
             return $header_encoded . '.' . $payload_encoded . '.' . $signature;
             
         } catch (Exception $e) {
-            SWN_Logger::error('JWT generation failed: ' . $e->getMessage());
+            PWN_Logger::error('JWT generation failed: ' . $e->getMessage());
             return false;
         }
     }
@@ -88,13 +88,17 @@ class SWN_JWT {
         // Replace timestamp placeholders
         $current_time = time();
         $template = str_replace('{{timestamp}}', $current_time, $template);
-        $template = preg_replace('/\{\{timestamp\+(\d+)\}\}/', $current_time + '$1', $template);
-        $template = preg_replace('/\{\{timestamp\-(\d+)\}\}/', $current_time - '$1', $template);
+        $template = preg_replace_callback('/{{timestamp\+(\d+)}}/', function($matches) use ($current_time) {
+            return $current_time + intval($matches[1]);
+        }, $template);
+        $template = preg_replace_callback('/{{timestamp-(\d+)}}/', function($matches) use ($current_time) {
+            return $current_time - intval($matches[1]);
+        }, $template);
         
         // Parse JSON
         $payload = json_decode($template, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            SWN_Logger::error('JWT payload JSON parse error: ' . json_last_error_msg());
+            PWN_Logger::error('JWT payload JSON parse error: ' . json_last_error_msg());
             return false;
         }
         
@@ -130,7 +134,7 @@ class SWN_JWT {
             case 'ES512':
                 return $this->create_rsa_signature($algorithm, $data, $key, $passphrase);
             default:
-                SWN_Logger::error('Unsupported JWT algorithm: ' . $algorithm);
+                PWN_Logger::error('Unsupported JWT algorithm: ' . $algorithm);
                 return false;
         }
     }
@@ -153,7 +157,7 @@ class SWN_JWT {
         }
         
         if (!$private_key) {
-            SWN_Logger::error('Failed to load private key for JWT signing');
+            PWN_Logger::error('Failed to load private key for JWT signing');
             return false;
         }
         
@@ -171,7 +175,7 @@ class SWN_JWT {
         );
         
         if (!isset($algo_map[$algorithm])) {
-            SWN_Logger::error('Unsupported RSA/ECDSA algorithm: ' . $algorithm);
+            PWN_Logger::error('Unsupported RSA/ECDSA algorithm: ' . $algorithm);
             return false;
         }
         
@@ -184,7 +188,7 @@ class SWN_JWT {
             if (defined('OPENSSL_ALGO_SHA256') && version_compare(PHP_VERSION, '7.2.0', '>=')) {
                 $success = openssl_sign($data, $signature, $private_key, $algo_map[$algorithm] | OPENSSL_KEYTYPE_RSA);
             } else {
-                SWN_Logger::error('PSS algorithms require PHP 7.2+ with OpenSSL support');
+                PWN_Logger::error('PSS algorithms require PHP 7.2+ with OpenSSL support');
                 return false;
             }
         } else {
@@ -193,7 +197,7 @@ class SWN_JWT {
         }
         
         if (!$success) {
-            SWN_Logger::error('Failed to create JWT signature');
+            PWN_Logger::error('Failed to create JWT signature');
             return false;
         }
         

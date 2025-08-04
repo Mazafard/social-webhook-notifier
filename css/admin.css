@@ -1,0 +1,136 @@
+/**
+ * Post Webhook Notifier - Admin CSS
+ */
+
+.required { 
+    color: #d63638; 
+}
+
+.card { 
+    margin-bottom: 20px; 
+}
+
+.card .title { 
+    margin-top: 0; 
+    padding-bottom: 8px; 
+    border-bottom: 1px solid #ddd; 
+}
+
+#test-webhook-result.notice { 
+    padding: 10px; 
+    margin: 15px 0; 
+}
+
+.dashicons { 
+    vertical-align: middle; 
+}
+
+/* Spinning animation for loading states */
+.spin { 
+    animation: spin 1s linear infinite; 
+}
+
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
+
+/* Form styling improvements */
+.form-table th {
+    padding-left: 0;
+}
+
+.form-field-row {
+    vertical-align: top;
+}
+
+.form-table td {
+    padding-bottom: 15px;
+}
+
+.form-table input[type="url"],
+.form-table input[type="text"],
+.form-table input[type="password"],
+.form-table textarea,
+.form-table select {
+    font-size: 13px;
+}
+
+.form-table textarea {
+    resize: vertical;
+}
+
+/* Card layout enhancements */
+.wrap .card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    padding: 20px;
+}
+
+.wrap .card h2.title {
+    color: #1d2327;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* Button styling */
+#test-webhook-btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+#test-webhook-btn .dashicons {
+    margin-right: 4px;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+/* Notice styling */
+.notice {
+    border-left: 4px solid;
+    padding: 12px;
+    margin: 15px 0;
+    background: #fff;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.notice-success {
+    border-left-color: #00a32a;
+}
+
+.notice-error {
+    border-left-color: #d63638;
+}
+
+.notice-warning {
+    border-left-color: #dba617;
+}
+
+.notice-info {
+    border-left-color: #72aee6;
+}
+
+/* Plugin header styling */
+.wrap h1 {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.wrap h1 .dashicons {
+    color: #2271b1;
+    margin-right: 8px;
+}
+
+/* Description styling */
+.wrap > p.description {
+    font-size: 14px;
+    margin-bottom: 25px;
+    color: #646970;
+    line-height: 1.5;
+}

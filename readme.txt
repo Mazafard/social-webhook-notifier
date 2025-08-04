@@ -1,9 +1,9 @@
-=== Social Webhook Notifier ===
+=== Post Webhook Notifier ===
 Contributors: mazafard
 Tags: webhook, n8n, zapier, automation, jwt
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,9 +27,17 @@ A powerful WordPress plugin that sends webhook notifications when posts are publ
 
 1. Upload the plugin zip file to the `wp-content/plugins/` directory.
 2. Activate the plugin through the ‘Plugins’ menu.
-3. Set your webhook URL in `Settings → Social Webhook Notifier`.
+3. Set your webhook URL in `Settings → Post Webhook Notifier`.
 
 == Changelog ==
+
+= 1.0.3 =
+* Updated plugin name from 'Social Webhook Notifier' to 'Post Webhook Notifier' for better accuracy
+* Changed plugin slug from 'social-webhook-notifier' to 'post-webhook-notifier'
+* Added proper prefixes (PWN_) to all functions, classes, and global variables
+* Moved inline CSS and JavaScript to external files using wp_enqueue_style and wp_enqueue_script
+* Improved code organization and WordPress coding standards compliance
+* Enhanced security with proper nonce handling and script localization
 
 = 1.0.2 =
 * Enhanced authentication system with comprehensive options

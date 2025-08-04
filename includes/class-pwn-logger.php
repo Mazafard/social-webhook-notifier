@@ -5,7 +5,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-class SWN_Logger {
+class PWN_Logger {
     
     /**
      * Logger instance
@@ -39,7 +39,7 @@ class SWN_Logger {
         // Only log during development/debugging - can be disabled for production
         if (defined('WP_DEBUG') && WP_DEBUG === true && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG === true) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- This is debug code, only active when WP_DEBUG and WP_DEBUG_LOG are enabled
-            error_log('SWN Plugin [' . strtoupper($level) . ']: ' . $message);
+            error_log('PWN Plugin [' . strtoupper($level) . ']: ' . $message);
         }
     }
     

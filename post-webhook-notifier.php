@@ -1,17 +1,17 @@
 <?php
 /**
- * Social Webhook Notifier
+ * Post Webhook Notifier
  *
- * @package SocialWebhookNotifier
- * @version 1.0.2
+ * @package PostWebhookNotifier
+ * @version 1.0.3
  * @author Maza Fard
  * @license GPL-2.0+
  */
 
 /*
-Plugin Name: Social Webhook Notifier
-Description: Sends a webhook when a post is published, so you can use it with n8n or Zapier to post on social media.
-Version: 1.0.2
+Plugin Name: Post Webhook Notifier
+Description: Sends a webhook when a post is published, so you can use it with automation tools like n8n or Zapier.
+Version: 1.0.3
 Author: Maza Fard
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,12 +23,17 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin path
-define('SWN_PLUGIN_PATH', plugin_dir_path(__FILE__));
+if (!defined('PWN_PLUGIN_PATH')) {
+    define('PWN_PLUGIN_PATH', function_exists('plugin_dir_path') ? plugin_dir_path(__FILE__) : dirname(__FILE__));
+}
+
+// Load WordPress compatibility functions (for IDE support)
+require_once PWN_PLUGIN_PATH . '/includes/wp-compat.php';
 
 // Main plugin class
-if (!class_exists('SocialWebhookNotifier')) {
+if (!class_exists('PostWebhookNotifier')) {
     
-    class SocialWebhookNotifier {
+    class PostWebhookNotifier {
         
         /**
          * Plugin instance
@@ -57,17 +62,21 @@ if (!class_exists('SocialWebhookNotifier')) {
          */
         private function init() {
             // Load core class
-            require_once SWN_PLUGIN_PATH . 'includes/class-swn-core.php';
+            require_once PWN_PLUGIN_PATH . 'includes/class-pwn-core.php';
             
             // Initialize core
-            SWN_Core::get_instance();
+            PWN_Core::get_instance();
             
             // Register activation/deactivation hooks
-            register_activation_hook(__FILE__, array('SWN_Core', 'activate'));
-            register_deactivation_hook(__FILE__, array('SWN_Core', 'deactivate'));
+            if (function_exists('register_activation_hook')) {
+                register_activation_hook(__FILE__, array('PWN_Core', 'activate'));
+            }
+            if (function_exists('register_deactivation_hook')) {
+                register_deactivation_hook(__FILE__, array('PWN_Core', 'deactivate'));
+            }
         }
     }
 }
 
 // Initialize the plugin
-SocialWebhookNotifier::get_instance();
+PostWebhookNotifier::get_instance();
