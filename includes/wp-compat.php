@@ -19,7 +19,7 @@ if (!function_exists('add_action')) {
     function current_user_can($capability, ...$args) { return false; }
     function sanitize_text_field($str) { return $str; }
     function wp_unslash($value) { return $value; }
-    function wp_die($message = '', $title = '', $args = array()) { die($message); }
+    function wp_die($message = '', $title = '', $args = array()) { die(esc_html($message)); }
     function get_option($option, $default = false) { return $default; }
     function wp_send_json_error($data = null, $status_code = null) {}
     function wp_send_json_success($data = null, $status_code = null) {}
@@ -38,6 +38,7 @@ if (!function_exists('add_action')) {
     function checked($checked, $current = true, $echo = true) { return ''; }
     function selected($selected, $current = true, $echo = true) { return ''; }
     function esc_attr($text) { return $text; }
+    function esc_html($text) { return htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); }
     function esc_textarea($text) { return $text; }
     function submit_button($text = null, $type = 'primary', $name = 'submit', $wrap = true, $other_attributes = null) {}
     function __($text, $domain = 'default') { return $text; }
